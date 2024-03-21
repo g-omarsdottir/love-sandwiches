@@ -2,16 +2,19 @@ import gspread
 from google.oauth2.service_account import Credentials
 from pprint import pprint
 
+
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/drive"
     ]
 
+
 CREDS = Credentials.from_service_account_file('creds.json')
 SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open('love_sandwiches')
+
 
 def get_sales_data():
     """
@@ -32,6 +35,7 @@ def get_sales_data():
         
     return sales_data
 
+
 def validate_data(values):
     """
     Inside the try, converts all string values into integers.
@@ -50,6 +54,9 @@ def validate_data(values):
         return False
     return True
 
+
+"""
+Following functions were refactured into the function update_worksheet(data, worksheet)
 def update_sales_worksheet(data):
     """
     Update sales worksheet, add new row with the list data provided.
@@ -59,7 +66,6 @@ def update_sales_worksheet(data):
     sales_worksheet.append_row(data)
     print("Sales worksheet updated successfully.\n")
 
-
 def update_surplus_worksheet(data):
     """
     Update surplus worksheet, add new row with calculated surplus.
@@ -68,6 +74,19 @@ def update_surplus_worksheet(data):
     surplus_worksheet = SHEET.worksheet("surplus")
     surplus_worksheet.append_row(data)
     print("Surplus worksheet updated successfully.\n")
+"""
+
+
+def update_worksheet(data, worksheet):
+    """
+    Receives a list of integers to be inserted into a worksheet
+    Update the relevant worksheet with the data provided
+    """
+    print(f"Updating {worksheet} worksheet...\n")
+    worksheet_to_update = SHEET.worksheet(worksheet)
+    worksheet_to_update.append_row(data)
+    print(f"{worksheet} worksheet updated sucessfully\n")
+
 
 def calculate_surplus_data(sales_row):
     """
@@ -87,16 +106,19 @@ def calculate_surplus_data(sales_row):
         surplus_data.append(surplus)
     return surplus_data
 
+
 def main():
     """
     Run all program functions
     """
     data = get_sales_data()
     sales_data = [int(num) for num in data] #list comprehension
-    update_sales_worksheet(sales_data) #calling our function pass it our sales_data list
+    update_worksheet(sales_data, "sales") #calling our function
     new_surplus_data = calculate_surplus_data(sales_data)
-    update_surplus_worksheet(new_surplus_data)
+    update_worksheet(new_surplus_data, "surplus")
 
 
 print("Welcome to Love Sandwiches Data Automation")
+
+
 main()
